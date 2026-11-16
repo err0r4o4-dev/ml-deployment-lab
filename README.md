@@ -151,18 +151,3 @@ uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
 | MAE | 0.327731 หรือประมาณ 32,773 ดอลลาร์ |
 
 RMSE/MAE เป็นผลประเมินบน test split ไม่ใช่การรับประกันความคลาดเคลื่อนสำหรับข้อมูลใหม่
-
-## สถานะการตรวจและสิ่งที่ยังต้องทำ
-
-- ฝึกโมเดลจริง และทดสอบ Python 17 ข้อผ่านด้วย `-W error` บน Windows แล้ว
-- ทดสอบเว็บด้วย Microsoft Edge แบบ headless ผ่าน รวม viewport 320, 768, 1024 และ 1440 px
-- ตรวจ resolve dependencies สำหรับ Linux/Python 3.11 แบบ dry-run ผ่าน (ไม่ใช่การ build Docker)
-- วันที่ 16 พฤศจิกายน 2026: Docker build/run ผ่านด้วย image `ds-ml-service:lab-verify-20261116`
-- ทดสอบใน Linux container ด้วย `python -W error -m unittest discover -s tests -v`: 17 ข้อผ่านใน 12.001 วินาที และ `python -m pip check` ผ่าน
-- ทดสอบ HTTP ของคอนเทนเนอร์จริง: health, prediction, invalid payload 11 แบบ, HTTP 400/405/413, HTML/static และ prediction พร้อมกัน 8 requests ผ่าน
-- Edge แบบ headless ทดสอบคอนเทนเนอร์จริงผ่าน: prediction `4.029472199999998`, USD 402,947, responsive, Reset, network error/retry และแบบฟอร์มเมื่อปิด JavaScript
-- ยืนยัน Gunicorn 2 workers และผู้ใช้ `appuser` (UID 1000); bind เฉพาะ loopback และหยุดคอนเทนเนอร์ทดสอบทั้งสองแล้ว โดยเก็บ image ไว้
-- ยังไม่มี independent review และยังไม่ commit, push, deploy หรือส่ง Google Form
-- ไม่เก็บ `.venv`, dataset cache, model, `.env` และไฟล์ชั่วคราวใน Git
-- โหลดเฉพาะ `model.pkl` ที่ฝึกจากโปรเจกต์นี้เอง ไม่ใช้ไฟล์ pickle จากแหล่งที่ไม่เชื่อถือ
-
