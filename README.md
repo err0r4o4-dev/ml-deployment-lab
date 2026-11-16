@@ -31,8 +31,6 @@ ml-deployment-lab/
 |   |-- assignment.md
 |   |-- prediction-desktop.png
 |   `-- prediction-mobile.png
-|-- model/                         # สร้างตอนฝึก ไม่ส่งขึ้น Git
-`-- data/                          # cache ข้อมูล ไม่ส่งขึ้น Git
 ```
 
 ## รันบน Windows ด้วย Python 3.11 และ uv
