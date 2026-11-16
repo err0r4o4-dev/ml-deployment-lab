@@ -1,0 +1,15 @@
+.git
+.venv
+.cache
+.env
+.env.*
+__pycache__
+*.py[cod]
+model
+data
+tests
+docs
+validation-artifacts
+.playwright-cli
+TODO.md
+requirements-dev.txt

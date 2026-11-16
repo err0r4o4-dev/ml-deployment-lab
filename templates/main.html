@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>California Housing - ML Predictor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #182532; }
+    * { box-sizing: border-box; }
+    body { max-width: 920px; margin: 24px auto; padding: 0 16px; background: #fff; }
+    h1 { margin-bottom: 4px; font-size: clamp(1.6rem, 5vw, 2rem); }
+    .sub { color: #4b5563; margin-top: 0; line-height: 1.5; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px 20px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; }
+    .help { font-size: 12px; color: #505b68; margin-top: 4px; }
+    input[type="number"] { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #88939f; border-radius: 10px; font: inherit; }
+    .actions { grid-column: 1 / -1; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button { min-height: 44px; padding: 10px 16px; border: 0; border-radius: 10px; cursor: pointer; font: inherit; }
+    button:disabled { cursor: wait; opacity: .65; }
+    .primary { background: #2563eb; color: white; }
+    .ghost { background: #edf1f5; color: #182532; }
+    :focus-visible { outline: 3px solid #1d4ed8; outline-offset: 3px; }
+    .result { margin-top: 18px; padding: 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #b9c6d3; white-space: pre-line; overflow-wrap: anywhere; line-height: 1.6; }
+    .result[data-state="error"] { color: #a01818; border-color: #c97272; }
+    footer { margin: 24px 0; color: #505b68; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+  </style>
+  <script src="{{ url_for('static', filename='main.js') }}" defer></script>
+</head>
+<body>
+  <main>
+    <h1>California Housing - ML Predictor</h1>
+    <p class="sub">Enter values and click <b>Predict</b>. The model estimates median house value in units of $100,000, not the price of an individual house.</p>
+    <form id="form" class="grid" method="post" action="/" autocomplete="off">
+      <div>
+        <label for="MedInc">MedInc (Median income, $10k units)</label>
+        <input id="MedInc" name="MedInc" type="number" step="any" min="0" max="25" placeholder="e.g., 8.3" value="{{ values.get('MedInc', '') }}" aria-describedby="MedInc-help" required />
+        <div class="help" id="MedInc-help">Typical 0-15. For example, 8.3 means $83,000.</div>
+      </div>
+      <div>
+        <label for="HouseAge">HouseAge (years)</label>
+        <input id="HouseAge" name="HouseAge" type="number" step="any" min="1" max="100" placeholder="e.g., 25" value="{{ values.get('HouseAge', '') }}" aria-describedby="HouseAge-help" required />
+        <div class="help" id="HouseAge-help">Median house age in the block group.</div>
+      </div>
+      <div>
+        <label for="AveRooms">AveRooms (avg rooms per dwelling)</label>
+        <input id="AveRooms" name="AveRooms" type="number" step="any" min="1" max="15" placeholder="e.g., 6.0" value="{{ values.get('AveRooms', '') }}" aria-describedby="AveRooms-help" required />
+        <div class="help" id="AveRooms-help">Total rooms / total households.</div>
+      </div>
+      <div>
+        <label for="AveBedrms">AveBedrms (avg bedrooms per dwelling)</label>
+        <input id="AveBedrms" name="AveBedrms" type="number" step="any" min="0.5" max="6" placeholder="e.g., 1.0" value="{{ values.get('AveBedrms', '') }}" aria-describedby="AveBedrms-help" required />
+        <div class="help" id="AveBedrms-help">Total bedrooms / total households.</div>
+      </div>
+      <div>
+        <label for="Population">Population (people)</label>
+        <input id="Population" name="Population" type="number" step="1" min="1" max="50000" placeholder="e.g., 1200" value="{{ values.get('Population', '') }}" aria-describedby="Population-help" required />
+        <div class="help" id="Population-help">Block group population.</div>
+      </div>
+      <div>
+        <label for="AveOccup">AveOccup (avg occupants per household)</label>
+        <input id="AveOccup" name="AveOccup" type="number" step="any" min="0.5" max="10" placeholder="e.g., 3.0" value="{{ values.get('AveOccup', '') }}" aria-describedby="AveOccup-help" required />
+        <div class="help" id="AveOccup-help">Population / households.</div>
+      </div>
+      <div>
+        <label for="Latitude">Latitude</label>
+        <input id="Latitude" name="Latitude" type="number" step="any" min="32" max="42" placeholder="e.g., 34.20" value="{{ values.get('Latitude', '') }}" aria-describedby="Latitude-help" required />
+        <div class="help" id="Latitude-help">Approximate California range: 32 to 42.</div>
+      </div>
+      <div>
+        <label for="Longitude">Longitude</label>
+        <input id="Longitude" name="Longitude" type="number" step="any" min="-125" max="-114" placeholder="e.g., -118.30" value="{{ values.get('Longitude', '') }}" aria-describedby="Longitude-help" required />
+        <div class="help" id="Longitude-help">Approximate California range: -125 to -114.</div>
+      </div>
+      <div class="actions">
+        <button type="button" class="ghost" id="sample">Use sample values</button>
+        <button type="submit" class="primary" id="predict">Predict</button>
+        <button type="reset" class="ghost">Reset</button>
+      </div>
+    </form>
+    <div id="output" class="result" role="status" aria-live="polite" data-state="{% if error %}error{% else %}success{% endif %}" {% if prediction is not defined and not error %}hidden{% endif %}>{% if error %}Error: {{ error }}{% elif prediction is defined %}Prediction: {{ '%.3f'|format(prediction) }} (units of $100,000)
+Estimated median house value: ${{ '{:,.0f}'.format(prediction * 100000) }}{% endif %}</div>
+    <noscript><p>JavaScript is disabled. Submit the form to view your prediction on this page.</p></noscript>
+    <footer>Feature order sent to the API: [MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude]<br />Educational demonstration using the California Housing dataset, not a current property valuation service.</footer>
+  </main>
+</body>
+</html>
